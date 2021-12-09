@@ -4,13 +4,11 @@ import requests
 import os
 
 load_dotenv()
-API_KEY = 'iGwYHV0tb4LyVgBRoHRBz22vlF2pzVcNtlpDBQVA'
 
-#api_key = os.environ.get('API_KEY')
+
+api_key = os.environ.get('API_KEY')
 
 app = Flask(__name__)
-
-
 
 @app.route('/')
 def index():
@@ -30,18 +28,15 @@ def index():
 def mars():
 
 
-
     if request.form.get('selected') == None:
-        camera = 'MAST'
+        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={API_KEY}')
     else:
         camera = request.form.get('selected')
-
-    response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera={camera}&api_key={API_KEY}')
+        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera={camera}&api_key={API_KEY}')
 
     response = response.json()
     photos = response['photos']
-# We've both been driving, but split duties between the templating and python
-# 👍
+
 
     try:
         image_url = photos[0]['img_src']
@@ -51,7 +46,5 @@ def mars():
         response = response.json()
         photos = response['photos']
         image_url = photos[0]['img_src']
-        
-    
 
     return render_template('mars.html', landing_image=image_url)
