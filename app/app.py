@@ -5,15 +5,18 @@ import os
 
 load_dotenv()
 
+# pushed to https://github.com/mpursell/DevOps-NASA-API in case you want it!
 
 api_key = os.environ.get('API_KEY')
+
+print (api_key)
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
 
-    response = requests.get(f"https://api.nasa.gov/planetary/apod?api_key={API_KEY}")
+    response = requests.get(f"https://api.nasa.gov/planetary/apod?api_key={api_key}")
 
     response = response.json()
     url = response['url']
@@ -29,10 +32,10 @@ def mars():
 
 
     if request.form.get('selected') == None:
-        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={API_KEY}')
+        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={api_key}')
     else:
         camera = request.form.get('selected')
-        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera={camera}&api_key={API_KEY}')
+        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera={camera}&api_key={api_key}')
 
     response = response.json()
     photos = response['photos']
@@ -41,7 +44,7 @@ def mars():
     try:
         image_url = photos[0]['img_src']
     except IndexError:
-        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={API_KEY}')
+        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={api_key}')
 
         response = response.json()
         photos = response['photos']
