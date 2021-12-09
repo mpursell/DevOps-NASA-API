@@ -1,15 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
-from dotenv import load_dotenv
 import requests
 import os
 
-load_dotenv()
-
-# pushed to https://github.com/mpursell/DevOps-NASA-API in case you want it!
-
 api_key = os.environ.get('API_KEY')
-
-print (api_key)
 
 app = Flask(__name__)
 
