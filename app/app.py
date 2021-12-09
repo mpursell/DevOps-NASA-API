@@ -1,16 +1,49 @@
+import json
 from flask import Flask, render_template, request, redirect, url_for
 import requests
 import os
 
+app = Flask(__name__)
+
 api_key = os.environ.get('API_KEY')
 
-app = Flask(__name__)
+class API_Handler():
+
+    def __init__(self, category: str):
+        self._api_key = os.environ.get('API_KEY')
+        self.category = category
+        self.query = {}
+        self.camera = 'mast'
+    
+        
+    # choose an endpoint depending on whether "mars" or "apod" is passed in
+    # default to camera=mast
+    def get_url(self):
+        if self.category == 'apod':
+            self.url = 'https://api.nasa.gov/planetary/apod'
+            self.query = {'api_key': self._api_key}
+            return self.url, self.query
+        elif self.category == 'mars':
+            self.url = 'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos'
+            self.query = {'sol':'1000', 'camera': f'{self.camera}', 'api_key':self._api_key}
+
+            return self.url, self.query
+
+    def make_request(self) -> json:
+        url = self.get_url()
+        payload = self.query
+        #response = requests.get(f'{url}', params=payload)
+        response = requests.get(self.url, params=payload)
+        return response
 
 @app.route('/')
 def index():
 
-    response = requests.get(f"https://api.nasa.gov/planetary/apod?api_key={api_key}")
+    #response = requests.get(f"https://api.nasa.gov/planetary/apod?api_key={api_key}")
 
+    apiCall = API_Handler('apod')
+    response = apiCall.make_request()
+    
     response = response.json()
     url = response['url']
 
@@ -23,14 +56,14 @@ def index():
 @app.route('/mars', methods=['GET','POST'])
 def mars():
 
+    camera = request.form.get('selected')
+    
+    apiCall = API_Handler('mars')
+    apiCall.camera = camera
 
-    if request.form.get('selected') == None:
-        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=mast&api_key={api_key}')
-    else:
-        camera = request.form.get('selected')
-        response = requests.get(f'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera={camera}&api_key={api_key}')
-
+    response = apiCall.make_request()
     response = response.json()
+    
     photos = response['photos']
 
 
