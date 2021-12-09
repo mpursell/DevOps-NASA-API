@@ -89,9 +89,10 @@ def mars():
         # make an API call with the class defaults (camera=mars) if there's nothing in the list of photos
         apiCall = API_Handler('mars')
         response = apiCall.make_request()
+        
 
         response = response.json()
-        photos = response['photos']
+        item.photos = response['photos']
         item.image_url = item.photos[0]['img_src']
 
     return render_template('mars.html', item=item)
