@@ -2,7 +2,27 @@
 {% block title %}Mars{% endblock %}
 
 {% block content %}
-  <h1 class="display-4">Photos from Mars:</h1>
+<div class="row">
+  <div class="col-lg-6 mx-auto">
+    <h1 class="display-4">Mars Curiosity Images:</h1>
+  </div>
+</div>
 
-  <img src="https://via.placeholder.com/500">
+<div class="row">
+  <div class="col-md-6">
+    <img src="{{ landing_image }}" width="500" height="500">
+  </div>
+  <div class="col-md-6">
+    <form action="/mars" method="post">
+      <input class="form-check-input" type="radio" name="selected" value="FHAZ">Front Hazard Avoidance Camera</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="RHAZ">Rear Hazard Avoidance Camera</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="MAST">Mast Camera</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="CHEMCAM">Chemistry and Camera Complex</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="MAHLI">Mars Hand Lens Imager</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="MARDI">Mars Descent Imager</input><br>
+      <input class="form-check-input" type="radio" name="selected" value="NAVCAM">Navigation Camera</input><br>
+      <input type="submit" value="Select Camera" class="btn btn-primary btn-block">
+    </form>
+  </div>
+</div>
 {% endblock %}
