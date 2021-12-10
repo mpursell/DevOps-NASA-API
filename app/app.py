@@ -1,5 +1,6 @@
 import json
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import date
 import requests
 import os
 
@@ -15,7 +16,14 @@ class API_Handler():
         self.category = category
         self.query = {}
         self.camera = 'mast'
-    
+        # get and set today's date as a default
+        self.chosenDate = self.get_todays_date()
+ 
+    def get_todays_date(self) -> str:
+        today = date.today()
+        today = today.strftime("%Y-%m-%d")
+        return today
+
         
     # choose an endpoint depending on whether "mars" or "apod" is passed in
     # default using a class attribute above to camera=mast
@@ -38,8 +46,6 @@ class API_Handler():
         payload = self.query
         response = requests.get(self.url, params=payload)
         return response
-
-    
 
 class Item:
 
@@ -93,6 +99,7 @@ def index():
 def mars():
 
     camera = request.form.get('selected')
+    chosenDate = request.form.get('datepicker')
     
     apiCall = API_Handler('mars')
     apiCall.camera = camera
