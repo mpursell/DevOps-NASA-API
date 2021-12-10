@@ -39,6 +39,8 @@ class API_Handler():
         response = requests.get(self.url, params=payload)
         return response
 
+    
+
 class Item:
 
     def __init__(self):
@@ -46,6 +48,22 @@ class Item:
         self.image_explanation = ""
         self.image_date = ""
         self.image_title =""
+        self.photos = []
+
+    def set_attributes(self, category, response):
+
+        self.response = response
+
+        if category == 'apod':
+            self.image_url = self.response['url']
+            self.image_title = self.response['title']
+            self.image_explanation = self.response['explanation']
+            self.image_date = self.response['date']
+
+        elif category == 'mars':
+            self.photos = self.response['photos']
+            self.image_url = self.photos[0]['img_src']
+
         
 
 @app.route('/')
@@ -56,12 +74,9 @@ def index():
     
     response = response.json() 
 
-    # create new Item object and set a load of properties we'll want
+    # create new Item object 
     item = Item()
-    item.image_url = response['url']
-    item.image_title = response['title']
-    item.image_explanation = response['explanation']
-    item.image_date = response['date']
+    item.set_attributes('apod', response)
     
     # now we've got an object with properties, we can just return that object,
     # rather than a long list of vars.
@@ -79,20 +94,22 @@ def mars():
     response = response.json()
     
     item = Item()
-    item.photos = response['photos']
+    item.set_attributes('mars', response)
 
     # reload after form submission, handle errors if there are no 
     # images returned
     try:
         item.image_url = item.photos[0]['img_src']
+
     except IndexError:
         # make an API call with the class defaults (camera=mars) if there's nothing in the list of photos
+
         apiCall = API_Handler('mars')
         response = apiCall.make_request()
         
-
         response = response.json()
-        item.photos = response['photos']
-        item.image_url = item.photos[0]['img_src']
+        item = Item()
+        item.set_attributes('mars', response)
+  
 
     return render_template('mars.html', item=item)
