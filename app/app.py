@@ -5,9 +5,11 @@ import os
 
 app = Flask(__name__)
 
+api_key = os.environ.get('API_KEY')
+
 class API_Handler():
 
-    def __init__(self, category: str):
+    def __init__(self, category: str): 
         self._api_key = os.environ.get('API_KEY')
         # category is the category of image - 'apod' or 'Mars' as it stands
         self.category = category
@@ -17,7 +19,7 @@ class API_Handler():
         
     # choose an endpoint depending on whether "mars" or "apod" is passed in
     # default using a class attribute above to camera=mast
-    def get_url(self):
+    def get_url(self) -> tuple[str, dict]:
 
         if self.category == 'apod':
             self.url = 'https://api.nasa.gov/planetary/apod'
@@ -48,21 +50,29 @@ class Item:
         self.image_title =""
         self.photos = []
 
-    def set_attributes(self, category, response):
+    def set_attributes(self, category:str, response:json):
 
         self.response = response
+        self.category = category
 
-        if category == 'apod':
+        if self.category == 'apod':
             self.image_url = self.response['url']
             self.image_title = self.response['title']
             self.image_explanation = self.response['explanation']
             self.image_date = self.response['date']
 
-        elif category == 'mars':
-            self.photos = self.response['photos']
-            self.image_url = self.photos[0]['img_src']
+        elif self.category == 'mars':
 
-        
+            # check to make sure we we get some photos.  If we don't photos[] will be empty and throw an IndexError.  If that happens, make another API request without specifying a camera, which will default to the class attribute: api.camera='mast' by default
+            try: 
+                self.photos = self.response['photos']
+                self.image_url = self.photos[0]['img_src']
+            except IndexError:
+                apiCall = API_Handler('mars')
+                newRequest = apiCall.make_request()
+                newRequest = newRequest.json()
+                self.photos = newRequest['photos']
+                self.image_url = self.photos[0]['img_src']
 
 @app.route('/')
 def index():
@@ -92,21 +102,6 @@ def mars():
     
     item = Item()
     item.set_attributes('mars', response)
-
-    # reload after form submission, handle errors if there are no 
-    # images returned
-    try:
-        item.image_url = item.photos[0]['img_src']
-
-    except IndexError:
-        # make an API call with the class defaults (camera=mars) if there's nothing in the list of photos, and create a new Item to give us something to display. 
-
-        apiCall = API_Handler('mars')
-        response = apiCall.make_request()
-        
-        response = response.json()
-        item = Item()
-        item.set_attributes('mars', response)
-  
+    
 
     return render_template('mars.html', item=item)
