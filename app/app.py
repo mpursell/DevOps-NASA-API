@@ -1,6 +1,6 @@
 import json
 from flask import Flask, render_template, request, redirect, url_for
-from datetime import date
+from datetime import date, timedelta
 import requests
 import os
 
@@ -17,12 +17,13 @@ class API_Handler():
         self.query = {}
         self.camera = 'mast'
         # get and set today's date as a default
-        self.chosenDate = self.get_todays_date()
+        self.chosenDate = self.get_default_date()
  
-    def get_todays_date(self) -> str:
-        today = date.today()
-        today = today.strftime("%Y-%m-%d")
-        return today
+    def get_default_date(self) -> str:
+        # set a default date 3 days in the past so NASA will have had time to populate some images
+        defaultDate = date.today() - timedelta(days = 3)
+        defaultDate = defaultDate.strftime("%Y-%m-%d")
+        return defaultDate
 
         
     # choose an endpoint depending on whether "mars" or "apod" is passed in
@@ -36,7 +37,7 @@ class API_Handler():
 
         elif self.category == 'mars':
             self.url = 'https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos'
-            self.query = {'sol':'1000', 'camera': f'{self.camera}', 'api_key':self._api_key}
+            self.query = {'earth_date':self.chosenDate, 'camera': f'{self.camera}', 'api_key':self._api_key}
 
         return self.url, self.query
 
@@ -103,6 +104,7 @@ def mars():
     
     apiCall = API_Handler('mars')
     apiCall.camera = camera
+    apiCall.chosenDate = chosenDate
 
     response = apiCall.make_request()
     response = response.json()
