@@ -5,8 +5,6 @@ import os
 
 app = Flask(__name__)
 
-api_key = os.environ.get('API_KEY')
-
 class API_Handler():
 
     def __init__(self, category: str):
@@ -74,7 +72,6 @@ def index():
     
     response = response.json() 
 
-    # create new Item object 
     item = Item()
     item.set_attributes('apod', response)
     
@@ -102,7 +99,7 @@ def mars():
         item.image_url = item.photos[0]['img_src']
 
     except IndexError:
-        # make an API call with the class defaults (camera=mars) if there's nothing in the list of photos
+        # make an API call with the class defaults (camera=mars) if there's nothing in the list of photos, and create a new Item to give us something to display. 
 
         apiCall = API_Handler('mars')
         response = apiCall.make_request()
